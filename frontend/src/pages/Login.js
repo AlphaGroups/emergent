@@ -2,7 +2,20 @@ import React from 'react';
 import { Building2 } from 'lucide-react';
 
 const Login = () => {
+  const [showError, setShowError] = useState(false);
+
+  useEffect(() => {
+    // Check if there's an error in the URL
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('error')) {
+      setShowError(true);
+    }
+  }, []);
+
   const handleGoogleLogin = () => {
+    // Clear error state
+    setShowError(false);
+    
     // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
     const redirectUrl = window.location.origin + '/dashboard';
     
