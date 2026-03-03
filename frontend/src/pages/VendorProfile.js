@@ -29,7 +29,7 @@ const VendorProfile = () => {
     loadVendor();
   }, [pan]);
 
-  const loadVendor = async () => {
+  const loadVendor = useCallback(async () => {
     try {
       const data = await getVendorByPAN(pan);
       setVendor(data);
@@ -38,7 +38,7 @@ const VendorProfile = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [pan]);
 
   const handleInitiateOTP = async () => {
     try {
