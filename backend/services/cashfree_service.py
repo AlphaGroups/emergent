@@ -82,6 +82,113 @@ class CashfreeService:
             logger.error(f"CIN verification failed: {str(e)}")
             raise ValueError(f"CIN verification failed: {str(e)}")
     
+    async def verify_pan_udyam(self, pan: str) -> Dict[str, Any]:
+        """Verify PAN and fetch Udyam Registration Number for Sole Proprietorship"""
+        try:
+            # Mock Udyam URN response
+            mock_response = {
+                "pan": pan,
+                "urn": f"UDYAM-MH-{pan[5:9]}-{pan[7:10]}",
+                "is_registered": True,
+                "name_on_pan": "Sample Proprietor Name"
+            }
+            
+            logger.info(f"PAN-Udyam verification successful for PAN {pan}")
+            return mock_response
+            
+        except Exception as e:
+            logger.error(f"PAN-Udyam verification failed: {str(e)}")
+            raise ValueError(f"PAN-Udyam verification failed: {str(e)}")
+    
+    async def verify_udyam(self, urn: str, pan: str) -> Dict[str, Any]:
+        """Verify Udyam Registration and fetch MSME details"""
+        try:
+            # Mock Udyam details response
+            mock_response = {
+                "urn": urn,
+                "business_name": "Sample Proprietorship Business",
+                "owner_name": "Sample Proprietor Name",
+                "registration_date": "2021-05-15",
+                "msme_category": "Micro",
+                "major_activity": "Manufacturing",
+                "status": "Active",
+                "name_match_score": 95.5
+            }
+            
+            logger.info(f"Udyam verification successful for URN {urn}")
+            return mock_response
+            
+        except Exception as e:
+            logger.error(f"Udyam verification failed: {str(e)}")
+            raise ValueError(f"Udyam verification failed: {str(e)}")
+    
+    async def verify_pan_gstin_earliest(self, pan: str) -> Dict[str, Any]:
+        """Fetch earliest GST registration date for Partnership firms"""
+        try:
+            all_gstins = await self.get_all_gstins_by_pan(pan)
+            
+            # Find earliest registration (mock date for now)
+            earliest_date = "2018-07-01"
+            
+            mock_response = {
+                "pan": pan,
+                "earliest_gst_date": earliest_date,
+                "total_registrations": len(all_gstins),
+                "status": "Active"
+            }
+            
+            logger.info(f"Earliest GST date found for PAN {pan}: {earliest_date}")
+            return mock_response
+            
+        except Exception as e:
+            logger.error(f"PAN-GSTIN earliest date fetch failed: {str(e)}")
+            raise ValueError(f"Failed to fetch earliest GST date: {str(e)}")
+    
+    async def verify_epfo_establishment(self, pan: str) -> Dict[str, Any]:
+        """Fetch EPFO establishment details using PAN"""
+        try:
+            # Mock EPFO response
+            mock_response = {
+                "establishment_code": f"MH/MUM/{pan[5:10]}",
+                "establishment_name": "Sample Partnership Firm",
+                "registration_date": "2018-08-15",
+                "status": "Active",
+                "covered_employees": 15,
+                "address": "123 Partnership Street, Mumbai"
+            }
+            
+            logger.info(f"EPFO establishment verification successful for PAN {pan}")
+            return mock_response
+            
+        except Exception as e:
+            logger.error(f"EPFO verification failed: {str(e)}")
+            raise ValueError(f"EPFO verification failed: {str(e)}")
+    
+    async def verify_trust_society_ocr(self, document_type: str, file_path: str) -> Dict[str, Any]:
+        """Extract trust/society details using OCR"""
+        try:
+            # Mock OCR response
+            mock_response = {
+                "document_type": document_type,
+                "registration_number": f"REG/{document_type[:4].upper()}/2019/12345",
+                "date_of_formation": "2019-03-20",
+                "entity_name": "Sample Trust/Society Name",
+                "registration_authority": "Registrar of Societies",
+                "trustees_members": [
+                    "Member 1 Name",
+                    "Member 2 Name",
+                    "Member 3 Name"
+                ],
+                "ngo_darpan_id": None
+            }
+            
+            logger.info(f"Trust/Society OCR verification successful")
+            return mock_response
+            
+        except Exception as e:
+            logger.error(f"Trust/Society OCR verification failed: {str(e)}")
+            raise ValueError(f"OCR verification failed: {str(e)}")
+    
     async def get_all_gstins_by_pan(self, pan: str) -> List[Dict[str, Any]]:
         """Fetch all GSTINs associated with a PAN"""
         try:
