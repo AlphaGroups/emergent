@@ -27,7 +27,7 @@ const VendorProfile = () => {
 
   useEffect(() => {
     loadVendor();
-  }, [pan]);
+  }, [pan, loadVendor]);
 
   const loadVendor = async () => {
     try {
