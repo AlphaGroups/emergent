@@ -5,6 +5,7 @@ import { exchangeSession } from '../services/api';
 const AuthCallback = () => {
   const navigate = useNavigate();
   const hasProcessed = useRef(false);
+  const [error, setError] = React.useState(null);
 
   useEffect(() => {
     // CRITICAL: Prevent duplicate processing under StrictMode
@@ -13,11 +14,22 @@ const AuthCallback = () => {
 
     const processAuth = async () => {
       try {
+        // Check for error in URL first
+        const searchParams = new URLSearchParams(window.location.search);
+        const errorParam = searchParams.get('error');
+        const errorDescription = searchParams.get('error_description');
+        
+        if (errorParam) {
+          console.error('OAuth Error:', errorParam, errorDescription);
+          setError(errorDescription || errorParam);
+          setTimeout(() => navigate('/login'), 3000);
+          return;
+        }
+
         // Extract session_id from URL (try both query params and hash)
         let sessionId = null;
         
         // First try query parameters
-        const searchParams = new URLSearchParams(window.location.search);
         sessionId = searchParams.get('session_id');
         
         // If not in query params, try hash fragment
@@ -31,7 +43,8 @@ const AuthCallback = () => {
           console.error('No session_id found in URL');
           console.log('Search:', window.location.search);
           console.log('Hash:', window.location.hash);
-          navigate('/login');
+          setError('No session ID received from authentication');
+          setTimeout(() => navigate('/login'), 3000);
           return;
         }
 
@@ -42,12 +55,27 @@ const AuthCallback = () => {
         navigate('/dashboard', { state: { user: userData }, replace: true });
       } catch (error) {
         console.error('Auth callback error:', error);
-        navigate('/login');
+        setError(error.response?.data?.detail || 'Authentication failed');
+        setTimeout(() => navigate('/login'), 3000);
       }
     };
 
     processAuth();
   }, [navigate]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center max-w-md">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 mb-4">
+            <p className="text-red-800 font-semibold mb-2">Authentication Error</p>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
+          <p className="text-slate-600 text-sm">Redirecting to login...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
