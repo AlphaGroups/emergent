@@ -2,8 +2,22 @@ import httpx
 import logging
 from typing import Optional, Dict, Any, List
 from config import settings
+from difflib import SequenceMatcher
 
 logger = logging.getLogger(__name__)
+
+def calculate_name_match_score(name1: str, name2: str) -> float:
+    """Calculate similarity score between two names (0-100)"""
+    if not name1 or not name2:
+        return 0.0
+    
+    # Normalize names
+    name1 = name1.lower().strip()
+    name2 = name2.lower().strip()
+    
+    # Use SequenceMatcher for fuzzy matching
+    ratio = SequenceMatcher(None, name1, name2).ratio()
+    return round(ratio * 100, 2)
 
 class CashfreeService:
     def __init__(self):
