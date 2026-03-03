@@ -133,7 +133,7 @@ async def verify_gstin(
     request: GSTINVerifyRequest,
     user = Depends(get_current_user)
 ):
-    """Phase 1: Verify GSTIN and fetch corporate details"""
+    """Phase 1: Verify GSTIN and fetch corporate details with entity-specific branching"""
     try:
         # Verify GSTIN
         gst_data = await cashfree_service.verify_gstin(
@@ -143,16 +143,9 @@ async def verify_gstin(
         
         pan = gst_data["pan"]
         entity_type = gst_data["entity_type"]
+        pan_char4 = pan[3].upper() if len(pan) > 3 else None
         
-        # Check if Company or LLP, fetch CIN
-        mca_data = None
-        if entity_type in ["Company", "LLP"]:
-            mca_data = await cashfree_service.verify_cin(pan)
-        
-        # Fetch all GSTINs for this PAN
-        all_gstins_data = await cashfree_service.get_all_gstins_by_pan(pan)
-        
-        # Store/update vendor in MongoDB
+        # Initialize vendor document
         vendor_doc = {
             "pan": pan,
             "user_id": user["user_id"],
@@ -167,11 +160,22 @@ async def verify_gstin(
                 "state": gst_data["state"],
                 "verified_at": datetime.now(timezone.utc)
             },
-            "all_gstins": all_gstins_data,
             "updated_at": datetime.now(timezone.utc)
         }
         
-        if mca_data:
+        # Fetch all GSTINs for this PAN
+        all_gstins_data = await cashfree_service.get_all_gstins_by_pan(pan)
+        vendor_doc["all_gstins"] = all_gstins_data
+        
+        # Branching logic based on entity type
+        mca_data = None
+        udyam_data = None
+        partnership_data = None
+        trust_society_data = None
+        
+        # Case 1: Company or LLP - Use MCA
+        if pan_char4 in ['C', 'L']:
+            mca_data = await cashfree_service.verify_cin(pan)
             vendor_doc["mca_data"] = {
                 "cin": mca_data["cin"],
                 "company_name": mca_data["company_name"],
@@ -180,6 +184,57 @@ async def verify_gstin(
                 "company_status": mca_data["company_status"],
                 "verified_at": datetime.now(timezone.utc)
             }
+            vendor_doc["registration_type"] = "MCA"
+        
+        # Case 2: Sole Proprietorship - Use Udyam
+        elif pan_char4 == 'P':
+            # Step 1: Get Udyam Registration Number
+            pan_udyam_response = await cashfree_service.verify_pan_udyam(pan)
+            
+            if pan_udyam_response.get("is_registered"):
+                urn = pan_udyam_response["urn"]
+                
+                # Step 2: Fetch Udyam details
+                udyam_details = await cashfree_service.verify_udyam(urn, pan)
+                
+                udyam_data = {
+                    "urn": udyam_details["urn"],
+                    "registration_date": udyam_details["registration_date"],
+                    "msme_category": udyam_details["msme_category"],
+                    "owner_name": udyam_details["owner_name"],
+                    "business_name": udyam_details["business_name"],
+                    "name_match_score": udyam_details["name_match_score"],
+                    "verified_at": datetime.now(timezone.utc)
+                }
+                vendor_doc["udyam_data"] = udyam_data
+                vendor_doc["registration_type"] = "UDYAM"
+        
+        # Case 3: Partnership Firm - Use GST earliest date + EPFO
+        elif pan_char4 == 'F':
+            # Get earliest GST registration date
+            gst_earliest = await cashfree_service.verify_pan_gstin_earliest(pan)
+            
+            # Get EPFO establishment details
+            epfo_details = await cashfree_service.verify_epfo_establishment(pan)
+            
+            partnership_data = {
+                "earliest_gst_date": gst_earliest["earliest_gst_date"],
+                "epfo_establishment_code": epfo_details["establishment_code"],
+                "establishment_name": epfo_details["establishment_name"],
+                "partners": [],  # Partners list would come from additional API if available
+                "verified_at": datetime.now(timezone.utc)
+            }
+            vendor_doc["partnership_data"] = partnership_data
+            vendor_doc["registration_type"] = "PARTNERSHIP_EPFO"
+        
+        # Case 4: Trust or Society - Requires OCR (handled separately via upload)
+        elif pan_char4 in ['T', 'S']:
+            trust_society_data = {
+                "registration_type": "Trust" if pan_char4 == 'T' else "Society",
+                "note": "Document upload required for verification"
+            }
+            vendor_doc["trust_society_data"] = trust_society_data
+            vendor_doc["registration_type"] = "TRUST_SOCIETY_PENDING"
         
         # Upsert vendor
         await db.vendors.update_one(
@@ -191,7 +246,11 @@ async def verify_gstin(
         return {
             "gst_details": gst_data,
             "mca_data": mca_data,
-            "all_gstins": all_gstins_data
+            "udyam_data": udyam_data,
+            "partnership_data": partnership_data,
+            "trust_society_data": trust_society_data,
+            "all_gstins": all_gstins_data,
+            "registration_type": vendor_doc["registration_type"]
         }
         
     except Exception as e:
