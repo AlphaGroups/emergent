@@ -10,9 +10,12 @@ import ProtectedRoute from "./components/ProtectedRoute";
 function AppRouter() {
   const location = useLocation();
   
-  // Check URL fragment (not query params) for session_id
+  // Check for session_id in both query params and hash fragment
   // This MUST happen during render, not in useEffect
-  if (location.hash?.includes('session_id=')) {
+  const hasSessionId = location.hash?.includes('session_id=') || 
+                       location.search?.includes('session_id=');
+  
+  if (hasSessionId) {
     return <AuthCallback />;
   }
 
