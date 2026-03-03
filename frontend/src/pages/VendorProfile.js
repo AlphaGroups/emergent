@@ -196,7 +196,7 @@ const VendorProfile = () => {
             </Card>
 
             {/* MCA Data */}
-            {vendor.mca_data && (
+            {vendor.mca_data && vendor.registration_type === 'MCA' && (
               <Card data-testid="mca-data-card">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -236,6 +236,9 @@ const VendorProfile = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Entity-Specific Registration Card (Udyam/Partnership/Trust) */}
+            <EntitySpecificCard vendor={vendor} />
           </div>
         </motion.div>
 
