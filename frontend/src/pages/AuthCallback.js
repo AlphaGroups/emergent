@@ -13,13 +13,24 @@ const AuthCallback = () => {
 
     const processAuth = async () => {
       try {
-        // Extract session_id from URL fragment
-        const hash = window.location.hash;
-        const params = new URLSearchParams(hash.substring(1));
-        const sessionId = params.get('session_id');
+        // Extract session_id from URL (try both query params and hash)
+        let sessionId = null;
+        
+        // First try query parameters
+        const searchParams = new URLSearchParams(window.location.search);
+        sessionId = searchParams.get('session_id');
+        
+        // If not in query params, try hash fragment
+        if (!sessionId) {
+          const hash = window.location.hash;
+          const hashParams = new URLSearchParams(hash.substring(1));
+          sessionId = hashParams.get('session_id');
+        }
 
         if (!sessionId) {
-          console.error('No session_id found');
+          console.error('No session_id found in URL');
+          console.log('Search:', window.location.search);
+          console.log('Hash:', window.location.hash);
           navigate('/login');
           return;
         }
