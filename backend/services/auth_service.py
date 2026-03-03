@@ -97,12 +97,16 @@ class AuthService:
         
         # Check expiry
         expires_at = session["expires_at"]
+        logger.info(f"Session expires at: {expires_at}")
         if isinstance(expires_at, str):
             expires_at = datetime.fromisoformat(expires_at)
         if expires_at.tzinfo is None:
             expires_at = expires_at.replace(tzinfo=timezone.utc)
         
-        if expires_at < datetime.now(timezone.utc):
+        current_time = datetime.now(timezone.utc)
+        logger.info(f"Current time: {current_time}, Expires at: {expires_at}")
+        if expires_at < current_time:
+            logger.warning("Session expired")
             return None
         
         # Get user data
@@ -111,6 +115,7 @@ class AuthService:
             {"_id": 0}
         )
         
+        logger.info(f"User found: {user}")
         return user
     
     async def logout(self, session_token: str) -> bool:
