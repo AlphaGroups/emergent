@@ -25,11 +25,6 @@ const VendorProfile = () => {
   const [licenseType, setLicenseType] = useState('');
   const [selectedFile, setSelectedFile] = useState(null);
 
-  useEffect(() => {
-    loadVendor();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadVendor]);
-
   const loadVendor = useCallback(async () => {
     try {
       const data = await getVendorByPAN(pan);
@@ -40,6 +35,10 @@ const VendorProfile = () => {
       setLoading(false);
     }
   }, [pan]);
+
+  useEffect(() => {
+    loadVendor();
+  }, [loadVendor]);
 
   const handleInitiateOTP = async () => {
     try {
