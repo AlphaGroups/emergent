@@ -329,7 +329,62 @@ async def get_vendor_by_pan(pan: str, user = Depends(get_current_user)):
     
     return vendor
 
-@api_router.post("/vendors/{pan}/upload-license")
+@api_router.post("/vendors/{pan}/upload-trust-society-doc")
+async def upload_trust_society_document(
+    pan: str,
+    document_type: str,
+    file: UploadFile = File(...),
+    user = Depends(get_current_user)
+):
+    """Upload and verify Trust/Society registration document with OCR"""
+    try:
+        # Read file
+        contents = await file.read()
+        
+        # Save file temporarily
+        upload_dir = Path("/app/backend/uploads")
+        upload_dir.mkdir(exist_ok=True)
+        file_id = uuid.uuid4().hex
+        file_path = upload_dir / f"{file_id}_{file.filename}"
+        
+        with open(file_path, "wb") as f:
+            f.write(contents)
+        
+        # Perform OCR verification
+        ocr_result = await cashfree_service.verify_trust_society_ocr(
+            document_type,
+            str(file_path)
+        )
+        
+        # Update vendor with trust/society data
+        trust_society_data = {
+            "registration_number": ocr_result["registration_number"],
+            "registration_type": document_type,
+            "date_of_formation": ocr_result["date_of_formation"],
+            "ngo_darpan_id": ocr_result.get("ngo_darpan_id"),
+            "trustees_members": ocr_result["trustees_members"],
+            "verified_at": datetime.now(timezone.utc)
+        }
+        
+        await db.vendors.update_one(
+            {"pan": pan, "user_id": user["user_id"]},
+            {
+                "$set": {
+                    "trust_society_data": trust_society_data,
+                    "registration_type": "TRUST_SOCIETY",
+                    "updated_at": datetime.now(timezone.utc)
+                }
+            }
+        )
+        
+        return {
+            "success": True,
+            "trust_society_data": trust_society_data
+        }
+        
+    except Exception as e:
+        logging.error(f"Trust/Society document upload failed: {str(e)}")
+        raise HTTPException(status_code=400, detail=str(e))
 async def upload_license_document(
     pan: str,
     license_type: str,
