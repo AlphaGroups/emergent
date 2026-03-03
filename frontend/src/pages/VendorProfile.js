@@ -27,6 +27,7 @@ const VendorProfile = () => {
 
   useEffect(() => {
     loadVendor();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadVendor]);
 
   const loadVendor = useCallback(async () => {
