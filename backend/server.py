@@ -347,18 +347,275 @@ async def download_due_diligence_report(
         if not vendor:
             raise HTTPException(status_code=404, detail="Vendor not found")
         
-        # In production, generate actual PDF with reportlab
-        # For now, return JSON as text file
-        import json
-        report_content = json.dumps(vendor, indent=2, default=str)
+        # Generate PDF report
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
         
-        file_path = Path(f"/tmp/vendor_report_{pan}.txt")
-        file_path.write_text(report_content)
+        file_path = Path(f"/tmp/vendor_report_{pan}.pdf")
+        
+        # Create PDF
+        doc = SimpleDocTemplate(
+            str(file_path),
+            pagesize=A4,
+            rightMargin=0.75*inch,
+            leftMargin=0.75*inch,
+            topMargin=1*inch,
+            bottomMargin=0.75*inch
+        )
+        
+        # Container for PDF elements
+        elements = []
+        styles = getSampleStyleSheet()
+        
+        # Custom styles
+        title_style = ParagraphStyle(
+            'CustomTitle',
+            parent=styles['Heading1'],
+            fontSize=24,
+            textColor=colors.HexColor('#0F172A'),
+            spaceAfter=12,
+            alignment=TA_CENTER,
+            fontName='Helvetica-Bold'
+        )
+        
+        heading_style = ParagraphStyle(
+            'CustomHeading',
+            parent=styles['Heading2'],
+            fontSize=16,
+            textColor=colors.HexColor('#004EEB'),
+            spaceAfter=12,
+            spaceBefore=12,
+            fontName='Helvetica-Bold'
+        )
+        
+        subheading_style = ParagraphStyle(
+            'CustomSubHeading',
+            parent=styles['Heading3'],
+            fontSize=12,
+            textColor=colors.HexColor('#1E293B'),
+            spaceAfter=8,
+            fontName='Helvetica-Bold'
+        )
+        
+        normal_style = ParagraphStyle(
+            'CustomNormal',
+            parent=styles['Normal'],
+            fontSize=10,
+            textColor=colors.HexColor('#334155')
+        )
+        
+        # Title
+        elements.append(Paragraph("Vendor Due Diligence Report", title_style))
+        elements.append(Paragraph("FinTrust Intelligence", normal_style))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Report metadata
+        from datetime import datetime
+        report_date = datetime.now().strftime("%B %d, %Y at %H:%M")
+        elements.append(Paragraph(f"<b>Report Generated:</b> {report_date}", normal_style))
+        elements.append(Paragraph(f"<b>Report ID:</b> {pan}-{datetime.now().strftime('%Y%m%d%H%M')}", normal_style))
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Phase 1: Corporate Identity
+        elements.append(Paragraph("Phase 1: Corporate Identity & Registration", heading_style))
+        
+        if vendor.get('gst_details'):
+            gst = vendor['gst_details']
+            
+            data = [
+                ['Field', 'Value'],
+                ['Legal Name', gst.get('legal_name', 'N/A')],
+                ['Trade Name', gst.get('trade_name', 'N/A')],
+                ['Entity Type', gst.get('entity_type', 'N/A')],
+                ['PAN', gst.get('pan', 'N/A')],
+                ['GSTIN', gst.get('gstin', 'N/A')],
+                ['Status', gst.get('status', 'N/A')],
+                ['State', gst.get('state', 'N/A')],
+                ['Registered Address', gst.get('registered_address', 'N/A')],
+            ]
+            
+            table = Table(data, colWidths=[2*inch, 4.5*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        # MCA Data
+        if vendor.get('mca_data'):
+            elements.append(Paragraph("MCA Registration Details", subheading_style))
+            mca = vendor['mca_data']
+            
+            data = [
+                ['Field', 'Value'],
+                ['CIN', mca.get('cin', 'N/A')],
+                ['Company Name', mca.get('company_name', 'N/A')],
+                ['Incorporation Year', mca.get('incorporation_year', 'N/A')],
+                ['Company Status', mca.get('company_status', 'N/A')],
+            ]
+            
+            table = Table(data, colWidths=[2*inch, 4.5*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            elements.append(Spacer(1, 0.15*inch))
+            
+            # Directors
+            if mca.get('directors'):
+                elements.append(Paragraph("<b>Directors/Key Personnel:</b>", normal_style))
+                for idx, director in enumerate(mca['directors'], 1):
+                    elements.append(Paragraph(f"{idx}. {director}", normal_style))
+                elements.append(Spacer(1, 0.2*inch))
+        
+        # Phase 2: Network Analysis
+        elements.append(Paragraph("Phase 2: Multi-State GST Network", heading_style))
+        
+        if vendor.get('all_gstins') and len(vendor['all_gstins']) > 0:
+            elements.append(Paragraph(f"Total Registrations: <b>{len(vendor['all_gstins'])}</b>", normal_style))
+            elements.append(Spacer(1, 0.1*inch))
+            
+            gstin_data = [['GSTIN', 'State', 'Filing Status', 'Status']]
+            for gstin in vendor['all_gstins']:
+                gstin_data.append([
+                    gstin.get('gstin', 'N/A'),
+                    gstin.get('state', 'N/A'),
+                    gstin.get('filing_status', 'N/A'),
+                    gstin.get('status', 'N/A')
+                ])
+            
+            table = Table(gstin_data, colWidths=[2.2*inch, 1.8*inch, 1.5*inch, 1*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        # Phase 3: Financial Data
+        if vendor.get('financial_history'):
+            elements.append(Paragraph("Phase 3: Financial Insights & Compliance", heading_style))
+            fin = vendor['financial_history']
+            
+            data = [
+                ['Financial Metric', 'Value'],
+                ['ITR Filing Status', fin.get('itr_filing_status', 'N/A')],
+                ['Turnover - Year 1 (Latest)', f"₹ {fin.get('turnover_year_1', 0):,.2f}" if fin.get('turnover_year_1') else 'N/A'],
+                ['Turnover - Year 2', f"₹ {fin.get('turnover_year_2', 0):,.2f}" if fin.get('turnover_year_2') else 'N/A'],
+                ['Turnover - Year 3', f"₹ {fin.get('turnover_year_3', 0):,.2f}" if fin.get('turnover_year_3') else 'N/A'],
+                ['EPF Number', fin.get('epf_number', 'N/A')],
+                ['ESIC Number', fin.get('esic_number', 'N/A')],
+                ['PF Number', fin.get('pf_number', 'N/A')],
+            ]
+            
+            table = Table(data, colWidths=[2.5*inch, 4*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            elements.append(Spacer(1, 0.2*inch))
+        else:
+            elements.append(Paragraph("Phase 3: Financial Insights & Compliance", heading_style))
+            elements.append(Paragraph("<i>Financial data not unlocked. OTP verification required.</i>", normal_style))
+            elements.append(Spacer(1, 0.2*inch))
+        
+        # License Documents
+        if vendor.get('licenses') and len(vendor['licenses']) > 0:
+            elements.append(Paragraph("License Documents", subheading_style))
+            
+            license_data = [['License Type', 'License Number', 'Validity']]
+            for lic in vendor['licenses']:
+                license_data.append([
+                    lic.get('license_type', 'N/A'),
+                    lic.get('license_number', 'Not extracted'),
+                    lic.get('validity', 'Not extracted')
+                ])
+            
+            table = Table(license_data, colWidths=[2*inch, 2.5*inch, 2*inch])
+            table.setStyle(TableStyle([
+                ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F1F5F9')),
+                ('TEXTCOLOR', (0, 0), (-1, 0), colors.HexColor('#0F172A')),
+                ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, 0), (-1, 0), 10),
+                ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                ('BACKGROUND', (0, 1), (-1, -1), colors.white),
+                ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E2E8F0')),
+                ('FONTSIZE', (0, 1), (-1, -1), 9),
+                ('TOPPADDING', (0, 1), (-1, -1), 8),
+                ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
+            ]))
+            
+            elements.append(table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        # Footer
+        elements.append(Spacer(1, 0.5*inch))
+        footer_style = ParagraphStyle(
+            'Footer',
+            parent=styles['Normal'],
+            fontSize=8,
+            textColor=colors.HexColor('#64748B'),
+            alignment=TA_CENTER
+        )
+        elements.append(Paragraph("___________________________________________________________________________", footer_style))
+        elements.append(Paragraph("This report is confidential and for authorized use only.", footer_style))
+        elements.append(Paragraph("Generated by FinTrust Intelligence - Vendor Due Diligence Platform", footer_style))
+        
+        # Build PDF
+        doc.build(elements)
         
         return FileResponse(
             path=str(file_path),
-            filename=f"vendor_report_{pan}.txt",
-            media_type="text/plain"
+            filename=f"VendorReport_{pan}_{datetime.now().strftime('%Y%m%d')}.pdf",
+            media_type="application/pdf"
         )
         
     except Exception as e:
