@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Building2, MapPin, User, ShieldCheck, Lock, Unlock, Download, Upload, CheckCircle2, AlertCircle } from 'lucide-react';
 import { getVendorByPAN, initiateOTP, verifyOTP, uploadLicense, downloadReport } from '../services/api';
