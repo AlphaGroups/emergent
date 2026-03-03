@@ -60,7 +60,7 @@ class DocumentUploadResponse(BaseModel):
 # Dependency to get current user from cookie or header
 async def get_current_user(
     session_token: Optional[str] = Cookie(default=None),
-    authorization: Optional[str] = None
+    authorization: Optional[str] = Header(default=None)
 ):
     # Try cookie first, then Authorization header
     token = session_token
