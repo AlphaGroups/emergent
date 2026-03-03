@@ -1,0 +1,174 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "FinTrust Intelligence",
+      "archetype": "Swiss & High-Contrast (Authority, Clarity, Truth)",
+      "tone": "Professional, Trustworthy, Efficient, Data-First",
+      "theme_mode": "light"
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Chivo, sans-serif",
+        "body": "Manrope, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "scale": {
+        "h1": "text-4xl md:text-5xl font-bold tracking-tight",
+        "h2": "text-3xl font-semibold tracking-tight",
+        "h3": "text-2xl font-medium tracking-tight",
+        "body_lg": "text-lg leading-relaxed",
+        "body_base": "text-base leading-relaxed",
+        "caption": "text-sm text-muted-foreground",
+        "mono_data": "font-mono text-sm tracking-wide"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Chivo:wght@300;400;700;900&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      ]
+    },
+    "colors": {
+      "primary": {
+        "DEFAULT": "#0F172A",
+        "foreground": "#F8FAFC",
+        "hover": "#1E293B"
+      },
+      "brand": {
+        "DEFAULT": "#004EEB",
+        "light": "#3B82F6",
+        "dark": "#1E40AF"
+      },
+      "background": {
+        "DEFAULT": "#F8FAFC",
+        "paper": "#FFFFFF",
+        "subtle": "#F1F5F9"
+      },
+      "status": {
+        "success": "#10B981",
+        "success_bg": "#ECFDF5",
+        "warning": "#F59E0B",
+        "warning_bg": "#FFFBEB",
+        "error": "#EF4444",
+        "error_bg": "#FEF2F2",
+        "locked": "#64748B",
+        "locked_bg": "#F1F5F9"
+      },
+      "border": {
+        "DEFAULT": "#E2E8F0",
+        "subtle": "#F1F5F9",
+        "strong": "#CBD5E1"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "section_gap": "gap-8 md:gap-12",
+      "card_padding": "p-6"
+    },
+    "visual_enhancers": {
+      "radius": "rounded-lg",
+      "shadows": {
+        "card": "shadow-[0_2px_8px_rgba(0,0,0,0.04)]",
+        "hover": "shadow-[0_8px_24px_rgba(0,0,0,0.08)]",
+        "modal": "shadow-[0_24px_48px_rgba(0,0,0,0.12)]"
+      },
+      "glassmorphism": {
+        "header": "bg-white/80 backdrop-blur-md border-b border-slate-200/50",
+        "overlay": "bg-slate-900/20 backdrop-blur-sm"
+      },
+      "gradients": {
+        "hero": "bg-gradient-to-br from-slate-50 to-slate-100",
+        "brand_accent": "bg-gradient-to-r from-blue-600 to-indigo-600"
+      }
+    },
+    "layout_strategies": {
+      "dashboard_grid": "grid grid-cols-1 md:grid-cols-12 gap-6",
+      "bento_card": "bg-white border border-slate-200 rounded-xl overflow-hidden",
+      "sidebar_nav": "hidden md:flex flex-col w-64 border-r border-slate-200 bg-white h-screen sticky top-0"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-6 rounded-md font-medium transition-all shadow-sm hover:shadow-md",
+      "secondary": "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 h-10 px-6 rounded-md font-medium transition-all",
+      "ghost": "hover:bg-slate-100 text-slate-600 hover:text-slate-900 h-10 px-4 rounded-md transition-colors",
+      "destructive": "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 h-10 px-6 rounded-md font-medium"
+    },
+    "inputs": {
+      "default": "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+      "search_large": "h-14 text-lg px-6 rounded-full shadow-sm border-slate-200 focus-visible:ring-blue-600"
+    },
+    "cards": {
+      "base": "bg-white rounded-xl border border-slate-200 shadow-sm",
+      "interactive": "bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-blue-200",
+      "locked": "bg-slate-50 rounded-xl border border-slate-200 border-dashed relative overflow-hidden"
+    },
+    "badges": {
+      "verified": "inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700",
+      "pending": "inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700",
+      "risk": "inline-flex items-center rounded-full border border-red-200 bg-red-50 px-2.5 py-0.5 text-xs font-semibold text-red-700",
+      "neutral": "inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-xs font-semibold text-slate-600"
+    }
+  },
+  "assets": {
+    "images": {
+      "login_bg": "https://images.unsplash.com/photo-1721995019477-99729ca02594?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwxfHxtb2Rlcm4lMjBvZmZpY2UlMjBidWlsZGluZyUyMGFyY2hpdGVjdHVyZSUyMGFic3RyYWN0fGVufDB8fHx8MTc3MjUyOTU5NXww&ixlib=rb-4.1.0&q=85",
+      "avatars": [
+        "https://images.unsplash.com/photo-1762522927402-f390672558d8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBjb3Jwb3JhdGUlMjBoZWFkc2hvdHxlbnwwfHx8fDE3NzI0OTA4MTV8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1762522926157-bcc04bf0b10a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwyfHxwcm9mZXNzaW9uYWwlMjBjb3Jwb3JhdGUlMjBoZWFkc2hvdHxlbnwwfHx8fDE3NzI0OTA4MTV8MA&ixlib=rb-4.1.0&q=85",
+        "https://images.unsplash.com/photo-1771898343647-bd979ad8cca5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwzfHxwcm9mZXNzaW9uYWwlMjBjb3Jwb3JhdGUlMjBoZWFkc2hvdHxlbnwwfHx8fDE3NzI0OTA4MTV8MA&ixlib=rb-4.1.0&q=85"
+      ],
+      "placeholders": {
+        "document": "https://placehold.co/400x600/F1F5F9/64748B?text=Document+Preview",
+        "chart": "https://placehold.co/600x300/F1F5F9/64748B?text=Financial+Chart"
+      }
+    },
+    "icons": {
+      "library": "lucide-react",
+      "preferred_set": ["ShieldCheck", "Building2", "FileText", "Lock", "Unlock", "Search", "Download", "AlertTriangle", "CheckCircle2", "Users", "TrendingUp", "Wallet"]
+    }
+  },
+  "page_strategies": {
+    "login": {
+      "layout": "Split screen: Left side branding/image (50%), Right side form (50%)",
+      "visuals": "Use 'login_bg' with a dark overlay on the left. Clean, centered form on the right."
+    },
+    "dashboard_main": {
+      "layout": "Top search bar (hero-like). Below: Grid of 'Recent Searches' or 'Watchlist'.",
+      "search_experience": "Central, prominent input field. Real-time validation feedback."
+    },
+    "vendor_profile": {
+      "layout": "Three-phase vertical layout or Tabbed interface.",
+      "phase_1": "Card-based grid. 'Identity', 'Directors', 'Address'. High visibility.",
+      "phase_2": "Network graph or List view for Related GSTINs.",
+      "phase_3": "Locked state initially. Blur overlay with 'Unlock' button. After unlock: Financial charts + Document list."
+    }
+  },
+  "universal_guidelines": {
+    "general": [
+      "Avoid generic 'AI slop' designs. Use intentional asymmetry where appropriate.",
+      "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients.",
+      "Create depth through layered design elements with z-index hierarchy.",
+      "Use glass-morphism effects with backdrop filters (12-24px blur) for sticky headers.",
+      "Every interaction needs micro-animations - hover states, transitions.",
+      "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+      "Subtle grain textures or noise overlays can elevate the 'paper' feel of the dashboard."
+    ],
+    "accessibility": [
+      "Ensure text contrast ratio of 4.5:1 for normal text.",
+      "Interactive elements must have focus states (ring-2 ring-blue-600).",
+      "Use data-testid attributes for all interactive elements."
+    ],
+    "motion": [
+      "Use 'framer-motion' for smooth layout transitions (layout prop).",
+      "Stagger children animations for lists and grids.",
+      "Duration: 0.2s - 0.3s for UI interactions. 0.5s for page transitions."
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install 'lucide-react', 'recharts', 'framer-motion', 'clsx', 'tailwind-merge' if not present.",
+    "Create a 'Layout' component that wraps pages with the Sidebar/Header structure.",
+    "Use the 'Manrope' font for the entire application. Add it to index.css via Google Fonts import.",
+    "Implement the 'Verification Badge' as a reusable component.",
+    "For the 'Financial Unlock' feature, use a blurred overlay on the actual data container until unlocked.",
+    "Use 'Recharts' for the Turnover and Financial graphs.",
+    "Ensure the 'GSTIN Search' is the focal point of the main dashboard."
+  ]
+}
