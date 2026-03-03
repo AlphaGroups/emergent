@@ -84,12 +84,15 @@ class AuthService:
     
     async def verify_session(self, session_token: str) -> Optional[Dict[str, Any]]:
         """Verify session token and return user data"""
+        logger.info(f"Verifying session token: {session_token}")
         session = await self.sessions_collection.find_one(
             {"session_token": session_token},
             {"_id": 0}
         )
         
+        logger.info(f"Session found: {session}")
         if not session:
+            logger.warning("Session not found")
             return None
         
         # Check expiry
